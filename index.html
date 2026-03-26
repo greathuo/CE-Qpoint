@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>共射放大电路参数对静态工作点的影响</title>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$','$'], ['\\(','\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .text-image-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 0px;
+        }
+
+        .text-image-row .text {
+            flex: 1;
+        }
+
+        .text-image-row img {
+            width: 180px;
+            height: auto;
+            margin: 0;
+        }
+
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .switch-row p {
+            margin: 0 !important;
+            flex: 1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider-switch {
+            background-color: #409eff;
+        }
+        input:checked + .slider-switch:before {
+            transform: translateX(26px);
+        }
+
+        .label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: normal;
+            color: #333;
+            margin-left: 60px;
+            margin-bottom: 0px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0px;
+        }
+
+        .formula {
+            font-size: 18px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            accent-color: #409eff;
+        }
+
+        .small-margin {
+            margin-bottom: 12px;
+            text-indent: 0em;
+        }
+
+        .img-box {
+            position: relative;
+            width: 90%;
+            margin: 10px auto 110px auto;
+        }
+
+        .img-box img {
+            width: 100%;
+            display: block;
+        }
+
+        .line-on-img {
+            position: absolute;
+            width: 94%;
+            height: 3px;
+            background: black;
+            top: 55%;
+            left: -2.5%;
+            transform: rotate(37deg);
+            z-index: 10;
+        }
+
+        .rc-radio-group, .ucc-radio-group, .re-radio-group, .beta-radio-group {
+            display: flex;
+            gap: 20px;
+            margin: 5px 0 15px 0;
+            font-size: 16px;
+        }
+        .rc-radio-item, .ucc-radio-item, .re-radio-item, .beta-radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .line-rc-red,.dot-rc-red,.text-rc-red,
+        .line-rc-green,.dot-rc-green,.text-rc-green,
+        .rc-q-red,.rc-q-green,.line-ucc-red,.dot-ucc-red,
+        .text-ucc-red,.line-ucc-green,.dot-ucc-green,
+        .text-ucc-green,.ucc-q-red,.ucc-q-green,
+        .line-re-red,.dot-re-red,.text-re-red,
+        .line-re-green,.dot-re-green,.text-re-green,
+        .re-q-red,.re-q-green,
+        .line-beta-red,.dot-beta-red,.text-beta-red,.beta-q-red,
+        .line-beta-green,.dot-beta-green,.text-beta-green,.beta-q-green,
+        .rc-coord-a,.rc-coord-b,.ucc-coord-a,.ucc-coord-b{
+            transition: all 0.5s ease;
+            opacity: 0;visibility: hidden;
+        }
+
+        /* RC */
+        .line-rc-red{position:absolute;width:94%;height:3px;background:#ff3333;top:52%;left:8%;transform:rotate(40deg);z-index:10;}
+        .dot-rc-red{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:53%;left:55.5%;z-index:12;}
+        .text-rc-red{position:absolute;color:#cc0000;font-size:16px;top:38%;left:25%;z-index:11;}
+        .rc-q-red{position:absolute;color:red;font-size:18px;font-weight:bold;top:42%;left:55%;z-index:13;}
+
+        .line-rc-green{position:absolute;width:92%;height:3px;background:#00aa00;top:66%;left:3%;transform:rotate(25deg);z-index:10;}
+        .dot-rc-green{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:54%;left:31%;z-index:12;}
+        .text-rc-green{position:absolute;color:#035203;font-size:16px;top:65%;left:30%;z-index:11;}
+        .rc-q-green{position:absolute;color:red;font-size:18px;font-weight:bold;top:43%;left:31%;z-index:13;}
+
+        /* RE */
+        .line-re-red{position:absolute;width:94%;height:3px;background:#ff3333;top:52%;left:8%;transform:rotate(40deg);z-index:10;}
+        .dot-re-red{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:53%;left:55.5%;z-index:12;}
+        .text-re-red{position:absolute;color:#cc0000;font-size:16px;top:38%;left:25%;z-index:11;}
+        .re-q-red{position:absolute;color:red;font-size:18px;font-weight:bold;top:42%;left:55%;z-index:13;}
+
+        .line-re-green{position:absolute;width:92%;height:3px;background:#00aa00;top:66%;left:3%;transform:rotate(25deg);z-index:10;}
+        .dot-re-green{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:70%;left:55.5%;z-index:12;}
+        .text-re-green{position:absolute;color:#035203;font-size:16px;top:65%;left:30%;z-index:11;}
+        .re-q-green{position:absolute;color:red;font-size:18px;font-weight:bold;top:60%;left:55.5%;z-index:13;}
+        
+        /* UCC */
+        .line-ucc-red{position:absolute;width:80%;height:3px;background:#ff3333;top:65%;left:1.5%;transform:rotate(30deg);z-index:10;}
+        .dot-ucc-red{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:53%;left:27%;z-index:12;}
+        .text-ucc-red{position:absolute;color:#cc0000;font-size:16px;top:63%;left:20%;z-index:11;}
+        .ucc-q-red{position:absolute;color:red;font-size:18px;font-weight:bold;top:43%;left:27%;z-index:13;}
+
+        .line-ucc-green{position:absolute;width:98%;height:3px;background:#00aa00;top:60%;left:0.5%;transform:rotate(30deg);z-index:10;}
+        .dot-ucc-green{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:52%;left:40%;z-index:12;}
+        .text-ucc-green{position:absolute;color:#035203;font-size:16px;top:57%;left:56%;z-index:11;}
+        .ucc-q-green{position:absolute;color:red;font-size:18px;font-weight:bold;top:42%;left:40%;z-index:13;}
+
+        /* Beta 较小 */
+        .line-beta-red{position:absolute;width:94%;height:3px;background:#01532d;top:52%;left:-3%;transform:rotate(40deg);z-index:10;}
+        .dot-beta-red{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:53%;left:45%;z-index:12;}
+        .text-beta-red{position:absolute;color:#01532d;font-size:16px;top:25%;left:26%;z-index:11;}
+        .beta-q-red{position:absolute;color:red;font-size:18px;font-weight:bold;top:45%;left:45%;z-index:13;}
+
+        /* Beta 较大 —— 新增加的绿色圆点和Q */
+        .line-beta-green{position:absolute;width:94%;height:3px;background:#01532d;top:52%;left:-3%;transform:rotate(40deg);z-index:10;}
+        .dot-beta-green{position:absolute;width:14px;height:14px;background:red;border-radius:50%;top:41%;left:34%;z-index:12;}
+        .text-beta-green{position:absolute;color:red;font-size:16px;top:25%;left:26%;z-index:11;}
+        .beta-q-green{position:absolute;color:red;font-size:18px;font-weight:bold;top:34%;left:34%;z-index:13;}
+
+        .rc-coord-a,.rc-coord-b,.ucc-coord-a,.ucc-coord-b{position:absolute;font-size:14px;z-index:11;}
+        .rc-coord-a{top:33%;left:-5%;}.rc-coord-b{top:92%;left:83%;}
+        .ucc-coord-a{top:28%;left:-5%;}.ucc-coord-b{top:92%;left:90%;}
+
+        .rc-show{opacity:1!important;visibility:visible!important;}
+
+        .vertical-dash{position:absolute;width:2px;border-left:3px dashed #cc0000;z-index:15;bottom:8%;left:30%;height:100%;transform-origin:bottom center;}
+        .horizontal-dash{position:absolute;height:2px;border-top:3px dashed #cc0000;z-index:15;left:7.5%;top:20%;width:100%;transform-origin:left center;}
+
+        .red-dot{position:absolute;width:14px;height:14px;background:red;border-radius:50%;z-index:9999;transform:translate(-50%,-50%);pointer-events:none;}
+        .uceq-label{position:absolute;color:#cc0000;z-index:30;transform:translateX(-50%);top:93%;left:30%;pointer-events:none;font-size:14px;}
+        .icq-label{position:absolute;color:#cc0000;z-index:30;transform:translateY(-50%);top:20%;left:1%;pointer-events:none;font-size:14px;}
+
+        .follow-img-wrapper{position:absolute!important;z-index:20!important;transform:translateX(-42.5%);top:93%;left:30%;pointer-events:none;width:60px!important;height:auto!important;}
+        .follow-img-wrapper img{position:absolute;width:100%;height:auto;transition:opacity 0.4s ease;}
+
+        .follow-reddot-wrapper{position:absolute!important;width:100px!important;height:100px!important;z-index:20!important;transform:translate(15%,-40%);pointer-events:none;}
+        .follow-reddot-wrapper img{position:absolute;width:100%;height:100%;object-fit:contain;transition:0.4s ease;}
+
+        .q-label{position:absolute;font-size:18px;font-weight:bold;color:red;z-index:9999;transform:translate(-50%,-110%);pointer-events:none;}
+
+        .rc-img-line,.ucc-img-line,.re-img-line{
+            position:relative;
+            width:90%;
+            margin:15px auto 20px auto;
+        }
+        .rc-img-line img,.ucc-img-line img,.re-img-line img{
+            width:100%;
+            display:block;
+        }
+
+        /* BETA 样式 */
+        .beta-img-line {
+            position: relative;
+            width: 90%;
+            margin: 15px auto 20px auto;
+        }
+        .beta-img-container {
+            position: relative;
+            width: 100%;
+        }
+        .beta-base {
+            width: 100%;
+            display: block;
+        }
+        .beta-mask {
+            position: absolute;
+            left: 7.5%; bottom: 8%;
+            width: 88%; height: 80%;
+            background: rgba(245,245,245, 0.8);
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .beta-overlay {
+            position: absolute;
+            left: 8.5%; bottom: 8%;
+            width: 88%; height: auto;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            transform-origin: left bottom;
+        }
+
+        .content-wrapper,.rb2-content-wrapper,.re-content-wrapper,.rc-content-wrapper,.beta-content-wrapper,.ucc-content-wrapper{display:none;}
+    </style>
+</head>
+<body>
+    <h1>CE电路参数对静态工作点的影响</h1>
+
+    <div class="text-image-row">
+        <div class="text">
+            <p>分压式电流负反馈放大电路中，电路静态工作点$\mathrm{Q}$由晶体管参数和放大器偏置电路共同决定，
+            静态工作点的选取会影响放大电路的增益、失真等各方面。</p>
+        </div>
+        <img src="images/CE.png" alt="共射放大电路">
+    </div>
+
+    <!-- (1) RB1 -->
+    <div class="switch-row">
+        <p class="small-margin">（1）改变$R_{\mathrm{B}1}$大小对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="contentSwitch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="content-wrapper">
+        <div class="label"><span>小</span><span>大</span></div>
+        <div class="slider-container">
+            <div class="formula">$R_{\mathrm{B}1}$</div>
+            <input type="range" id="sliderRb1" min="4" max="44" value="20">
+        </div>
+        <div class="img-box">
+            <img src="images/output_curve.png">
+            <div class="line-on-img"></div>
+            <div class="vertical-dash"></div>
+            <div class="horizontal-dash"></div>
+            <div class="red-dot"></div>
+            <div class="q-label">$\mathrm{Q}$</div>
+            <div class="uceq-label">$U_{\mathrm{CEQ}}$</div>
+            <div class="icq-label">$I_{\mathrm{CQ}}$</div>
+            <div class="follow-img-wrapper">
+                <img src="images/uo.png" class="img1">
+                <img src="images/uo1.png" class="img2">
+                <img src="images/uo2.png" class="img3">
+            </div>
+            <div class="follow-reddot-wrapper">
+                <img src="images/ic.png" class="r-img1">
+                <img src="images/ic1.png" class="r-img2">
+                <img src="images/ic2.png" class="r-img3">
+            </div>
+        </div>
+    </div>
+
+    <!-- (2) RB2 -->
+    <div class="switch-row">
+        <p class="small-margin">（2）改变$R_{\mathrm{B}2}$大小对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="rb2Switch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="rb2-content-wrapper">
+        <div class="label"><span>小</span><span>大</span></div>
+        <div class="slider-container">
+            <div class="formula">$R_{\mathrm{B}2}$</div>
+            <input type="range" id="sliderRb2" min="4" max="44" value="20">
+        </div>
+        <div class="img-box">
+            <img src="images/output_curve.png">
+            <div class="line-on-img"></div>
+            <div class="vertical-dash"></div>
+            <div class="horizontal-dash"></div>
+            <div class="red-dot"></div>
+            <div class="q-label">$\mathrm{Q}$</div>
+            <div class="uceq-label">$U_{\mathrm{CEQ}}$</div>
+            <div class="icq-label">$I_{\mathrm{CQ}}$</div>
+            <div class="follow-img-wrapper">
+                <img src="images/uo.png" class="img1">
+                <img src="images/uo1.png" class="img2">
+                <img src="images/uo2.png" class="img3">
+            </div>
+            <div class="follow-reddot-wrapper">
+                <img src="images/ic.png" class="r-img1">
+                <img src="images/ic1.png" class="r-img2">
+                <img src="images/ic2.png" class="r-img3">
+            </div>
+        </div>
+    </div>
+
+    <!-- (3) RC -->
+    <div class="switch-row">
+        <p class="small-margin">（3）改变$R_{\mathrm{C}}$大小对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="rcSwitch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="rc-content-wrapper">
+        <div class="rc-radio-group">
+            <label class="rc-radio-item"><input type="radio" name="rcSel" value="small"> $R_\mathrm{C}$ 较小</label>
+            <label class="rc-radio-item"><input type="radio" name="rcSel" value="large" checked> $R_\mathrm{C}$ 较大</label>
+        </div>
+        <div class="rc-img-line">
+            <img src="images/output_curve_2.png">
+            <div class="line-rc-red"></div><div class="dot-rc-red"></div><div class="text-rc-red">$R_\mathrm{C}$ 较小</div><div class="rc-q-red">$\mathrm{Q}$</div>
+            <div class="line-rc-green"></div><div class="dot-rc-green"></div><div class="text-rc-green">$R_\mathrm{C}$ 较大</div><div class="rc-q-green">$\mathrm{Q}$</div>
+            <div class="rc-coord-a">$\dfrac{U_\mathrm{CC}}{R_\mathrm{C}}$</div><div class="rc-coord-b">$U_\mathrm{CC}$</div>
+        </div>
+    </div>
+
+    <!-- (4) RE -->
+    <div class="switch-row">
+        <p class="small-margin">（4）改变$R_{\mathrm{E}}$大小对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="reSwitch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="re-content-wrapper">
+        <div class="re-radio-group">
+            <label class="re-radio-item"><input type="radio" name="reSel" value="small"> $R_\mathrm{E}$ 较小</label>
+            <label class="re-radio-item"><input type="radio" name="reSel" value="large" checked> $R_\mathrm{E}$ 较大</label>
+        </div>
+        <div class="re-img-line">
+            <img src="images/output_curve_2.png">
+            <div class="line-re-red"></div><div class="dot-re-red"></div><div class="text-re-red">$R_\mathrm{E}$ 较小</div><div class="re-q-red">$\mathrm{Q}$</div>
+            <div class="line-re-green"></div><div class="dot-re-green"></div><div class="text-re-green">$R_\mathrm{E}$ 较大</div><div class="re-q-green">$\mathrm{Q}$</div>
+        </div>
+    </div>
+
+    <!-- （5）β变化 -->
+    <div class="switch-row">
+        <p class="small-margin">（5）BJT的$\beta$变化对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="betaSwitch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="beta-content-wrapper">
+        <div class="beta-radio-group">
+            <label class="beta-radio-item"><input type="radio" name="betaSel" value="small" checked> $\beta$ 较小</label>
+            <label class="beta-radio-item"><input type="radio" name="betaSel" value="large"> $\beta$ 较大</label>
+        </div>
+        <div class="beta-img-line">
+            <div class="beta-img-container">
+                <img src="images/output_curve_2.png" class="beta-base">
+                <div class="beta-mask"></div>
+                <img src="images/output_curve_3.png" class="beta-overlay">
+            </div>
+            <div class="line-beta-red"></div>
+            <div class="dot-beta-red"></div>
+            <div class="text-beta-red">$\beta$ 较小</div>
+            <div class="beta-q-red">$\mathrm{Q}$</div>
+
+            <!-- 新增：β 较大时的绿色元素 -->
+            <div class="line-beta-green"></div>
+            <div class="dot-beta-green"></div>
+            <div class="text-beta-green">$\beta$ 较大</div>
+            <div class="beta-q-green">$\mathrm{Q}$</div>
+        </div>
+    </div>
+
+    <!-- (6) UCC -->
+    <div class="switch-row">
+        <p class="small-margin">（6）改变$U_{\mathrm{CC}}$大小对静态工作点的影响。</p>
+        <label class="switch"><input type="checkbox" id="uccSwitch" checked><span class="slider-switch"></span></label>
+    </div>
+    <div class="ucc-content-wrapper">
+        <div class="ucc-radio-group">
+            <label class="ucc-radio-item"><input type="radio" name="uccSel" value="small"> $U_\mathrm{CC}$ 较小</label>
+            <label class="ucc-radio-item"><input type="radio" name="uccSel" value="large" checked> $U_\mathrm{CC}$ 较大</label>
+        </div>
+        <div class="ucc-img-line">
+            <img src="images/output_curve_2.png">
+            <div class="line-ucc-red"></div><div class="dot-ucc-red"></div><div class="text-ucc-red">$U_\mathrm{CC}$ 较小</div><div class="ucc-q-red">$\mathrm{Q}$</div>
+            <div class="line-ucc-green"></div><div class="dot-ucc-green"></div><div class="text-ucc-green">$U_\mathrm{CC}$ 较大</div><div class="ucc-q-green">$\mathrm{Q}$</div>
+            <div class="ucc-coord-a">$\dfrac{U_\mathrm{CC}}{R_\mathrm{C}}$</div><div class="ucc-coord-b">$U_\mathrm{CC}$</div>
+        </div>
+    </div>
+
+    <script>
+        function bindToggle(switchId, wrapperSel){
+            const el=document.getElementById(switchId);
+            const wrap=document.querySelector(wrapperSel);
+            el.addEventListener('change',function(){wrap.style.display=this.checked?'none':'block';});
+        }
+        bindToggle('contentSwitch','.content-wrapper');
+        bindToggle('rb2Switch','.rb2-content-wrapper');
+        bindToggle('reSwitch','.re-content-wrapper');
+        bindToggle('rcSwitch','.rc-content-wrapper');
+        bindToggle('betaSwitch','.beta-content-wrapper');
+        bindToggle('uccSwitch','.ucc-content-wrapper');
+
+        // RB1 正向
+        function bindSliderNormal(sliderSel, boxSel){
+            const slider=document.querySelector(sliderSel);
+            const box=document.querySelector(boxSel);
+            const redDot=box.querySelector('.red-dot');
+            const vLine=box.querySelector('.vertical-dash');
+            const hLine=box.querySelector('.horizontal-dash');
+            const uceqLabel=box.querySelector('.uceq-label');
+            const icqLabel=box.querySelector('.icq-label');
+            const followImg=box.querySelector('.follow-img-wrapper');
+            const followR=box.querySelector('.follow-reddot-wrapper');
+            const qLabel=box.querySelector('.q-label');
+
+            const img1=box.querySelector('.img1'),img2=box.querySelector('.img2'),img3=box.querySelector('.img3');
+            const r1=box.querySelector('.r-img1'),r2=box.querySelector('.r-img2'),r3=box.querySelector('.r-img3');
+
+            function update(){
+                let min=+slider.min,max=+slider.max,val=+slider.value;
+                let perTotal=(val-min)/(max-min);
+                let per=val/50;
+
+                if(perTotal<=0.08){img1.style.opacity=0;img2.style.opacity=1;img3.style.opacity=0;r1.style.opacity=0;r2.style.opacity=1;r3.style.opacity=0;}
+                else if(perTotal>=0.9){img1.style.opacity=0;img2.style.opacity=0;img3.style.opacity=1;r1.style.opacity=0;r2.style.opacity=0;r3.style.opacity=1;}
+                else{img1.style.opacity=1;img2.style.opacity=0;img3.style.opacity=0;r1.style.opacity=1;r2.style.opacity=0;r3.style.opacity=0;}
+
+                const angle=45.5,len=105,x0=9.5,y0=19.5;
+                const rad=angle*Math.PI/180;
+                const x=x0+per*len*Math.cos(rad);
+                const y=y0+per*len*Math.sin(rad);
+
+                redDot.style.left=qLabel.style.left=followR.style.left=x+'%';
+                redDot.style.top=qLabel.style.top=followR.style.top=y+'%';
+                vLine.style.left=uceqLabel.style.left=followImg.style.left=x+'%';
+                hLine.style.top=icqLabel.style.top=y+'%';
+                vLine.style.height=(1-per)*72+'%';
+                hLine.style.width=per*75+'%';
+            }
+            slider.addEventListener('input',update);
+            update();
+        }
+
+        // RB2 反向
+        function bindSliderReverse(sliderSel, boxSel){
+            const slider=document.querySelector(sliderSel);
+            const box=document.querySelector(boxSel);
+            const redDot=box.querySelector('.red-dot');
+            const vLine=box.querySelector('.vertical-dash');
+            const hLine=box.querySelector('.horizontal-dash');
+            const uceqLabel=box.querySelector('.uceq-label');
+            const icqLabel=box.querySelector('.icq-label');
+            const followImg=box.querySelector('.follow-img-wrapper');
+            const followR=box.querySelector('.follow-reddot-wrapper');
+            const qLabel=box.querySelector('.q-label');
+
+            const img1=box.querySelector('.img1'),img2=box.querySelector('.img2'),img3=box.querySelector('.img3');
+            const r1=box.querySelector('.r-img1'),r2=box.querySelector('.r-img2'),r3=box.querySelector('.r-img3');
+
+            function update(){
+                let min=+slider.min,max=+slider.max,val=+slider.value;
+                let perTotal=(val-min)/(max-min);
+                let revPerTotal = 1 - perTotal;
+                let per = (max + min - val)/50;
+
+                if(revPerTotal<=0.08){img1.style.opacity=0;img2.style.opacity=1;img3.style.opacity=0;r1.style.opacity=0;r2.style.opacity=1;r3.style.opacity=0;}
+                else if(revPerTotal>=0.9){img1.style.opacity=0;img2.style.opacity=0;img3.style.opacity=1;r1.style.opacity=0;r2.style.opacity=0;r3.style.opacity=1;}
+                else{img1.style.opacity=1;img2.style.opacity=0;img3.style.opacity=0;r1.style.opacity=1;r2.style.opacity=0;r3.style.opacity=0;}
+
+                const angle=45.5,len=105,x0=9.5,y0=19.5;
+                const rad=angle*Math.PI/180;
+                const x=x0+per*len*Math.cos(rad);
+                const y=y0+per*len*Math.sin(rad);
+
+                redDot.style.left=qLabel.style.left=followR.style.left=x+'%';
+                redDot.style.top=qLabel.style.top=followR.style.top=y+'%';
+                vLine.style.left=uceqLabel.style.left=followImg.style.left=x+'%';
+                hLine.style.top=icqLabel.style.top=y+'%';
+                vLine.style.height=(1-per)*72+'%';
+                hLine.style.width=per*75+'%';
+            }
+            slider.addEventListener('input',update);
+            update();
+        }
+
+        bindSliderNormal('#sliderRb1','.content-wrapper .img-box');
+        bindSliderReverse('#sliderRb2','.rb2-content-wrapper .img-box');
+
+        // RC
+        (function initRcRadio(){
+            const radios=document.querySelectorAll('input[name="rcSel"]');
+            const lineR=document.querySelector('.line-rc-red'),dotR=document.querySelector('.dot-rc-red'),textR=document.querySelector('.text-rc-red'),qR=document.querySelector('.rc-q-red');
+            const lineG=document.querySelector('.line-rc-green'),dotG=document.querySelector('.dot-rc-green'),textG=document.querySelector('.text-rc-green'),qG=document.querySelector('.rc-q-green');
+            const a=document.querySelector('.rc-coord-a'),b=document.querySelector('.rc-coord-b');
+            function up(){
+                const s=document.querySelector('input[name="rcSel"]:checked').value;
+                if(s==='small'){lineR.classList.add('rc-show');dotR.classList.add('rc-show');textR.classList.add('rc-show');qR.classList.add('rc-show');lineG.classList.remove('rc-show');dotG.classList.remove('rc-show');textG.classList.remove('rc-show');qG.classList.remove('rc-show');a.style.opacity=0;b.style.opacity=1;}
+                else{lineG.classList.add('rc-show');dotG.classList.add('rc-show');textG.classList.add('rc-show');qG.classList.add('rc-show');lineR.classList.remove('rc-show');dotR.classList.remove('rc-show');textR.classList.remove('rc-show');qR.classList.remove('rc-show');a.style.opacity=1;b.style.opacity=1;}
+            }
+            radios.forEach(r=>r.addEventListener('change',up));up();
+        })();
+
+        // RE
+        (function initReRadio(){
+            const radios=document.querySelectorAll('input[name="reSel"]');
+            const lineR=document.querySelector('.line-re-red'),dotR=document.querySelector('.dot-re-red'),textR=document.querySelector('.text-re-red'),qR=document.querySelector('.re-q-red');
+            const lineG=document.querySelector('.line-re-green'),dotG=document.querySelector('.dot-re-green'),textG=document.querySelector('.text-re-green'),qG=document.querySelector('.re-q-green');
+            function up(){
+                const s=document.querySelector('input[name="reSel"]:checked').value;
+                if(s==='small'){lineR.classList.add('rc-show');dotR.classList.add('rc-show');textR.classList.add('rc-show');qR.classList.add('rc-show');lineG.classList.remove('rc-show');dotG.classList.remove('rc-show');textG.classList.remove('rc-show');qG.classList.remove('rc-show');}
+                else{lineG.classList.add('rc-show');dotG.classList.add('rc-show');textG.classList.add('rc-show');qG.classList.add('rc-show');lineR.classList.remove('rc-show');dotR.classList.remove('rc-show');textR.classList.remove('rc-show');qR.classList.remove('rc-show');}
+            }
+            radios.forEach(r=>r.addEventListener('change',up));up();
+        })();
+
+        // BETA 切换逻辑（已优化）
+        (function initBetaOverlay() {
+            const radios = document.querySelectorAll('input[name="betaSel"]');
+            const mask = document.querySelector('.beta-mask');
+            const overlay = document.querySelector('.beta-overlay');
+
+            // 两组元素
+            const lineR = document.querySelector('.line-beta-red');
+            const dotR = document.querySelector('.dot-beta-red');
+            const textR = document.querySelector('.text-beta-red');
+            const qR = document.querySelector('.beta-q-red');
+
+            const lineG = document.querySelector('.line-beta-green');
+            const dotG = document.querySelector('.dot-beta-green');
+            const textG = document.querySelector('.text-beta-green');
+            const qG = document.querySelector('.beta-q-green');
+
+            function update() {
+                const v = document.querySelector('input[name="betaSel"]:checked').value;
+                if (v === 'small') {
+                    mask.style.opacity = '0';
+                    overlay.style.opacity = '0';
+                    // 显示红色，隐藏绿色
+                    lineR.classList.add('rc-show');
+                    dotR.classList.add('rc-show');
+                    textR.classList.add('rc-show');
+                    qR.classList.add('rc-show');
+                    lineG.classList.remove('rc-show');
+                    dotG.classList.remove('rc-show');
+                    textG.classList.remove('rc-show');
+                    qG.classList.remove('rc-show');
+                } else {
+                    mask.style.opacity = '1';
+                    overlay.style.opacity = '1';
+                    // 显示绿色，隐藏红色
+                    lineR.classList.remove('rc-show');
+                    dotR.classList.remove('rc-show');
+                    textR.classList.remove('rc-show');
+                    qR.classList.remove('rc-show');
+                    lineG.classList.add('rc-show');
+                    dotG.classList.add('rc-show');
+                    textG.classList.add('rc-show');
+                    qG.classList.add('rc-show');
+                }
+            }
+            radios.forEach(r => r.addEventListener('change', update));
+            update();
+        })();
+
+        // UCC
+        (function initUccRadio(){
+            const radios=document.querySelectorAll('input[name="uccSel"]');
+            const lineR=document.querySelector('.line-ucc-red'),dotR=document.querySelector('.dot-ucc-red'),textR=document.querySelector('.text-ucc-red'),qR=document.querySelector('.ucc-q-red');
+            const lineG=document.querySelector('.line-ucc-green'),dotG=document.querySelector('.dot-ucc-green'),textG=document.querySelector('.text-ucc-green'),qG=document.querySelector('.ucc-q-green');
+            const a=document.querySelector('.ucc-coord-a'),b=document.querySelector('.ucc-coord-b');
+            function up(){
+                const s=document.querySelector('input[name="uccSel"]:checked').value;
+                if(s==='small'){lineR.classList.add('rc-show');dotR.classList.add('rc-show');textR.classList.add('rc-show');qR.classList.add('rc-show');lineG.classList.remove('rc-show');dotG.classList.remove('rc-show');textG.classList.remove('rc-show');qG.classList.remove('rc-show');a.style.opacity=0;b.style.opacity=1;}
+                else{lineG.classList.add('rc-show');dotG.classList.add('rc-show');textG.classList.add('rc-show');qG.classList.add('rc-show');lineR.classList.remove('rc-show');dotR.classList.remove('rc-show');textR.classList.remove('rc-show');qR.classList.remove('rc-show');a.style.opacity=1;b.style.opacity=1;}
+            }
+            radios.forEach(r=>r.addEventListener('change',up));up();
+        })();
+    </script>
+</body>
+</html>
